@@ -21,6 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 	curl_close($curlInterface);
 	header('Content-Type: application/octet-stream');
 	header('Cache-Control: priavte, no-cache');
-	echo @file_get_contents('php://input');
+	echo $result;
 }
 ?>
