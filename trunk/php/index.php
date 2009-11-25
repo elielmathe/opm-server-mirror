@@ -1,8 +1,12 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-	header('Content-Type: text/plain');
 	if (function_exists("curl_init")) {
-		echo 'Hello Opera Mini Server!';
+		if (!$_GET["test"] != null) {
+			header( "HTTP/1.1 301 Moved Permanently" );
+			header( "Location: http://www.google.com/ncr" );
+		} else {
+			echo 'Hello Opera Mini Server!';
+		}
 	} else {
 		echo 'cURL is not enabled.';
 	}
