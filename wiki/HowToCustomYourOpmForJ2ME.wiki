@@ -1,6 +1,6 @@
 #summary 如何修改Java（J2ME）版的OPM
 
-修改步骤：
+==修改步骤==
   # 先安装JDK或者JRE，安装地址如下： http://www.java.com/getjava
   # 准备好适合你手机的Java版OPM，下载地址见此（需翻墙）： http://www.opera.com/mini/download/
   # 在此处下载Java Class File Editor并解压某个文件夹： http://sourceforge.net/projects/classeditor/files/
