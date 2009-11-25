@@ -5,7 +5,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 			header( "HTTP/1.1 301 Moved Permanently" );
 			header( "Location: http://www.google.com/ncr" );
 		} else {
-			echo 'Hello Opera Mini Server!';
+			echo 'Hello Opera Mini Server! Fuck GFW!';
 		}
 	} else {
 		echo 'cURL is not enabled.';
