@@ -1,4 +1,7 @@
+#summary 如何修改Java（J2ME）版的OPM
 #labels Featured,Phase-Deploy
+
+==修改步骤==
   # 先此处下载并安装JRE：http://www.java.com/getjava/ 。如果你已经安装了JRE或者JDK，请跳过此步。
   # 在此处下载smali： http://smali.googlecode.com/files/smali.jar
   # 在此处下载反编译过的的Android版OPM源代码： http://opm-server-mirror.googlecode.com/files/android_opera_classes.zip
