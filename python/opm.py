@@ -7,8 +7,12 @@ from google.appengine.api import urlfetch
 
 class MainPage(webapp.RequestHandler):
   def get(self):
-    self.response.headers.add_header('Content-Type', 'text/plain')
-    self.response.out.write('Hello Opera Mini Server!')
+	if self.request.get('test'):
+		self.response.headers.add_header('Content-Type', 'text/plain')
+		self.response.out.write('Hello Opera Mini Server! Fuck GFW!')
+	else:
+		self.response.set_status(301, webapp.Response.http_status_message(301))
+		self.response.headers.add_header('Location', 'http://www.google.com/ncr')
   def post(self):
 	url = "http://server4.operamini.com"
 	headers = {
