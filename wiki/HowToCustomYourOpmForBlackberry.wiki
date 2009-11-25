@@ -1,4 +1,4 @@
-#summary 如何在黑莓的Opera Mini使用自定义服务器地址。
+#summary 如何在黑莓的Opera Mini使用自定义服务器地址
 #labels Featured,Phase-Deploy
 
 以下内容来自BBerCN：
