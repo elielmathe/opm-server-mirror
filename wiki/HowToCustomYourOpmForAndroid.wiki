@@ -1,4 +1,4 @@
-#summary 如何修改Java（J2ME）版的OPM
+#summary 如何修改Android版的OPM
 #labels Featured,Phase-Deploy
 
 ==修改步骤==
