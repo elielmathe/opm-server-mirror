@@ -51,6 +51,9 @@ public class OpmServlet extends HttpServlet {
 				while ((length = con_in.read(buffer)) != -1) {
 					resp_out.write(buffer, 0, length);
 				}
+				resp_out.flush();
+				resp_out.close();
+				con_in.close();
 			} else {
 				resp.sendError(connection.getResponseCode());
 			}
