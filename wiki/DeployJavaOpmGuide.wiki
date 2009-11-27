@@ -1,5 +1,5 @@
+#summary Java版的Opm代理服务端架设指南
 #labels Phase-Deploy
-#Java版的Opm代理服务端架设指南
 
 = 在GAE上架设 =
 
