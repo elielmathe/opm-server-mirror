@@ -19,7 +19,7 @@
 {{{
 <application>your_application_name</application>
 }}}
-      把“your_application_name”注册到的GAE application id名，修改好后保存。
+      把“your_application_name”改成你注册到的GAE application id名称，修改好后保存。
     # 接下来是命令操作了
         * Linux用户，打开终端，进入GAE 的开发包的目录，运行下面代码  
 {{{    
