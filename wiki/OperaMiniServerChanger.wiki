@@ -1,0 +1,20 @@
+#summary OperaMini服务地址修改器说明
+#labels Featured
+
+= 简介 =
+
+Opera Mini Server Changer是修改Opera Mini服务地址的工具，直接生成修改后的Jar。
+    * 目前支持4.2和5.0beta2的国际版、中国版和实验室版。
+    * 使用Java编写的，可以运行在Linux、Windows、Mac上。
+    * 目前为 0.1 beta版，下载地址在[http://code.google.com/p/opm-server-mirror/downloads/list 项目下载页]。
+
+http://opm-server-mirror.googlecode.com/svn/wiki/picture/omsc_screenshot.png
+
+= 使用 =
+
+运行需要Java虚拟机，可到[http://www.java.com/zh_CN/ Java官网]下载。
+    # 一般安装后Java虚拟后，会自动关联了jar文件，直接双击即可运行。如果没关联，打开终端执行
+{{{
+java -jar omsc.jar
+}}}
+    # 选择jar文件和保存文件，测试一下代理地址，选择Jar版本，点击“修改”，搞定。
