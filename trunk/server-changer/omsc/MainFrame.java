@@ -49,12 +49,24 @@ public class MainFrame extends JFrame {
 
 	private static final int FRAME_WIDTH = 520;
 	private static final int FRAME_HEIGHT = 460;
-	private static final String FRAME_TITLE = "Opera Mini Server Changer v0.1 beta";
+	private static final String FRAME_TITLE = "Opera Mini Server Changer v0.1";
 
 	public static final String[] SERVER_LINK = { "opm-server-mirror",
 			"http://code.google.com/p/opm-server-mirror/" };
 	public static final String[] EMULATOR_LINK = { "MicroEmulator",
 			"http://code.google.com/p/microemu/downloads/list" };
+	public static final String[] INTERNATIONAL_JAD = {
+			"Jad",
+			"http://mini.opera.com/download-4/opera-mini-latest-advanced-zh.jad?no_redir&ismobile=false" };
+	public static final String[] INTERNATIONAL_JAR = {
+			"Jar",
+			"http://mini.opera.com/download-4/opera-mini-latest-advanced-zh.jar?no_redir&ismobile=false" };
+	public static final String[] INTERNATIONAL_NEXT_JAD = {
+			"Jad",
+			"http://m.opera.com/download-5/opera-mini-latest-advanced-en.jad?no_redir&ismobile=false" };
+	public static final String[] INTERNATIONAL_NEXT_JAR = {
+			"Jar",
+			"http://m.opera.com/download-5/opera-mini-latest-advanced-en.jar?no_redir&ismobile=false" };
 
 	private JPanel contentPanel;
 	private JButton sourceJarButton, saveJarButton, testServerButton,
@@ -65,10 +77,14 @@ public class MainFrame extends JFrame {
 	private LinkLabel serverLinkLabel, clientLinkLabel, clientNextLinkLabel,
 			clientCHNLinkLabel, clientNextCHNLinkLabel, clientLABLinkLabel,
 			emulatorLinkLabel;
+	private LinkLabel clientJadLinkLabel, clientJarLinkLabel,
+			clientNextJadLinkLabel, clientNextJarLinkLabel;
 	private JTextArea messageTextArea;
 
 	private LinkLabelMouseAdapter linkLabelMouseAdapter;
 	private ButtonMouseAdapter buttonMouseAdapter;
+
+	private JFileChooser jarFileChooser;
 
 	private enum MessageType {
 		NORMAL, INFO, TIPS, WARRING, ERROR
@@ -104,8 +120,12 @@ public class MainFrame extends JFrame {
 		versionComboBox = new JComboBox(OperaMini.operaMiniItems);
 		serverLinkLabel = new LinkLabel(SERVER_LINK);
 		clientLinkLabel = new LinkLabel(OperaMini.international.getLabelText());
+		clientJadLinkLabel = new LinkLabel(INTERNATIONAL_JAD);
+		clientJarLinkLabel = new LinkLabel(INTERNATIONAL_JAR);
 		clientNextLinkLabel = new LinkLabel(OperaMini.internationalNext
 				.getLabelText());
+		clientNextJadLinkLabel = new LinkLabel(INTERNATIONAL_NEXT_JAD);
+		clientNextJarLinkLabel = new LinkLabel(INTERNATIONAL_NEXT_JAR);
 		clientCHNLinkLabel = new LinkLabel(OperaMini.china.getLabelText());
 		clientNextCHNLinkLabel = new LinkLabel(OperaMini.chinaNext
 				.getLabelText());
@@ -114,6 +134,7 @@ public class MainFrame extends JFrame {
 		messageTextArea = new JTextArea();
 		linkLabelMouseAdapter = new LinkLabelMouseAdapter();
 		buttonMouseAdapter = new ButtonMouseAdapter();
+		jarFileChooser = new JFileChooser();
 	}
 
 	private void setupGUI() {
@@ -205,10 +226,16 @@ public class MainFrame extends JFrame {
 		JPanel clientLinksPanel = new JPanel();
 		clientLinksPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 0));
 		clientLinksPanel.add(clientLinkLabel);
+		clientLinksPanel.add(clientJadLinkLabel);
+		clientLinksPanel.add(clientJarLinkLabel);
 		clientLinksPanel.add(clientNextLinkLabel);
-		clientLinksPanel.add(clientCHNLinkLabel);
-		clientLinksPanel.add(clientNextCHNLinkLabel);
-		clientLinksPanel.add(clientLABLinkLabel);
+		clientLinksPanel.add(clientNextJadLinkLabel);
+		clientLinksPanel.add(clientNextJarLinkLabel);
+		JPanel clientCHNLinksPanel = new JPanel();
+		clientCHNLinksPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 0));
+		clientCHNLinksPanel.add(clientCHNLinkLabel);
+		clientCHNLinksPanel.add(clientNextCHNLinkLabel);
+		clientCHNLinksPanel.add(clientLABLinkLabel);
 
 		JPanel emulatorLinksPanel = new JPanel();
 		emulatorLinksPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 0));
@@ -216,8 +243,10 @@ public class MainFrame extends JFrame {
 
 		linksPanel.add(new JLabel("代理服务端下载："), constraintLabel);
 		linksPanel.add(serverLinksPanel, constraintFillEnd);
-		linksPanel.add(new JLabel("手机客户端下载："), constraintLabel);
+		linksPanel.add(new JLabel("国际版下载："), constraintLabel);
 		linksPanel.add(clientLinksPanel, constraintFillEnd);
+		linksPanel.add(new JLabel("中国版下载："), constraintLabel);
+		linksPanel.add(clientCHNLinksPanel, constraintFillEnd);
 		linksPanel.add(new JLabel("Java ME 模拟器："), constraintLabel);
 		linksPanel.add(emulatorLinksPanel, constraintFillEnd);
 
@@ -242,11 +271,10 @@ public class MainFrame extends JFrame {
 	}
 
 	private void selectSourceJarFile() {
-		JFileChooser dialog = new JFileChooser();
-		dialog.setFileFilter(new JarFileFilter());
-		int option = dialog.showOpenDialog(null);
+		jarFileChooser.setFileFilter(new JarFileFilter());
+		int option = jarFileChooser.showOpenDialog(null);
 		if (option == JFileChooser.APPROVE_OPTION) {
-			String path = dialog.getSelectedFile().getPath();
+			String path = jarFileChooser.getSelectedFile().getPath();
 			sourceJarTextField.setText(path);
 			if (saveJarTextField.getText().trim().isEmpty()) {
 				String autoSavePath = path.substring(0, path.length() - 4)
@@ -257,11 +285,10 @@ public class MainFrame extends JFrame {
 	}
 
 	private void selectSaveJarFile() {
-		JFileChooser dialog = new JFileChooser();
-		dialog.setFileFilter(new JarFileFilter());
-		int option = dialog.showSaveDialog(null);
+		jarFileChooser.setFileFilter(new JarFileFilter());
+		int option = jarFileChooser.showSaveDialog(null);
 		if (option == JFileChooser.APPROVE_OPTION) {
-			String path = dialog.getSelectedFile().getPath();
+			String path = jarFileChooser.getSelectedFile().getPath();
 			if (!path.endsWith(".jar")) {
 				path += ".jar";
 			}
@@ -385,7 +412,7 @@ public class MainFrame extends JFrame {
 
 	private void showAboutDialog() {
 		String aboutText;
-		aboutText = "Opera Mini Server Changer v0.1 beta \n under GPLv3 write by muzuiget";
+		aboutText = "Opera Mini Server Changer v0.1\n under GPLv3 write by muzuiget";
 		JOptionPane.showMessageDialog(null, aboutText, "关于",
 				JOptionPane.INFORMATION_MESSAGE);
 	}
@@ -419,7 +446,11 @@ public class MainFrame extends JFrame {
 		convertButton.addMouseListener(buttonMouseAdapter);
 		serverLinkLabel.addMouseListener(linkLabelMouseAdapter);
 		clientLinkLabel.addMouseListener(linkLabelMouseAdapter);
+		clientJadLinkLabel.addMouseListener(linkLabelMouseAdapter);
+		clientJarLinkLabel.addMouseListener(linkLabelMouseAdapter);
 		clientNextLinkLabel.addMouseListener(linkLabelMouseAdapter);
+		clientNextJadLinkLabel.addMouseListener(linkLabelMouseAdapter);
+		clientNextJadLinkLabel.addMouseListener(linkLabelMouseAdapter);
 		clientCHNLinkLabel.addMouseListener(linkLabelMouseAdapter);
 		clientNextCHNLinkLabel.addMouseListener(linkLabelMouseAdapter);
 		clientLABLinkLabel.addMouseListener(linkLabelMouseAdapter);
