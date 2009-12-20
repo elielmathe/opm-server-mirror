@@ -302,6 +302,13 @@ public class MainFrame extends JFrame {
 			printMessage(MessageType.ERROR, "未输入代理网址。");
 			return;
 		}
+		if (!urlText.startsWith("http://")) {
+			urlText = "http://" + urlText;
+			testServerTextField.setText(urlText);
+		}
+		if (urlText.indexOf("/", "http://".length()) == -1) {
+			urlText += "/";
+		}
 
 		URL server;
 		try {
@@ -367,11 +374,12 @@ public class MainFrame extends JFrame {
 				if (entry.getName().equals(operaMini.classFile)) {
 					zipEntryBytes = Changer.replaceClassBytesString(
 							zipEntryBytes, operaMini.httpServer, newServer);
+					zipEntryBytes = Changer.replaceClassBytesString(
+							zipEntryBytes, operaMini.socketServer, newServer);
 					if (operaMini.changerKey) {
-						zipEntryBytes = Changer.replaceClassBytesString(
-								zipEntryBytes, operaMini.socketServer,
-								OperaMini.international.socketServer);
-						zipEntryBytes = Changer.replaceServerKey(zipEntryBytes);
+						zipEntryBytes = Changer.replaceBytesString(
+								zipEntryBytes, OperaMini.CHINA_SERVER_KEY,
+								OperaMini.SERVER_KEY);
 					}
 				}
 
@@ -450,7 +458,7 @@ public class MainFrame extends JFrame {
 		clientJarLinkLabel.addMouseListener(linkLabelMouseAdapter);
 		clientNextLinkLabel.addMouseListener(linkLabelMouseAdapter);
 		clientNextJadLinkLabel.addMouseListener(linkLabelMouseAdapter);
-		clientNextJadLinkLabel.addMouseListener(linkLabelMouseAdapter);
+		clientNextJarLinkLabel.addMouseListener(linkLabelMouseAdapter);
 		clientCHNLinkLabel.addMouseListener(linkLabelMouseAdapter);
 		clientNextCHNLinkLabel.addMouseListener(linkLabelMouseAdapter);
 		clientLABLinkLabel.addMouseListener(linkLabelMouseAdapter);

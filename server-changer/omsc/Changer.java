@@ -58,7 +58,6 @@ public class Changer {
 				newServer[0]);
 		outputFileBytes = replaceClassBytesString(outputFileBytes, server[1],
 				newServer[1]);
-		outputFileBytes = replaceServerKey(outputFileBytes);
 
 		FileOutputStream fileOutStream = new FileOutputStream(outputFile);
 		fileOutStream.write(outputFileBytes);
@@ -80,13 +79,12 @@ public class Changer {
 		return out.toByteArray();
 	}
 
-	public static byte[] replaceServerKey(byte[] bytes) {
-		String oldKey = "8c60d2a6811f85366af231ae416831b09409b614e9cfa8fde8d8577e892636e0e0b7a151f9601b930bf527ea8a22bfe6fb5f72506bd3e81b3b55d189af17e35b2d7ea61d84ba4e62cf1c01789edb2c3f3c00fc3c09ee1fc9627367294727e52af4c990516d8d7aad4e00d6ab50cd8ca63705df0af243e666dad282d6514b656780e108d591cf78920f7bdee21ed1419a080655ca2acdadc4e64dba01b5accf73";
-		String newKey = "c1dd7ab77e2c967746fe10681026c920f864811321bcb8be6bbfa5a03fda4e16c9c8db3af280f7703366e778e93c55e7159a8852d2b1381e521a337f22b1406cddf41a3114aecb4f4bfe79e0c5aa2ba8824fc989cb8bdcbf8ec5cef5176bfd4059f229b91bfa025126b295f9c409e75f6f6415ee094fd7f5dfd395a1f431668c5a08e88de891dc4dd38d4e9aa9b9c00dc604a0428e3aa5a28ccfa75af099147b";
-
+	public static byte[] replaceBytesString(byte[] bytes, String source,
+			String replacement) {
 		String bytesString = new String(bytes, Charset.forName("US-ASCII"));
-		int offset = bytesString.indexOf(oldKey);
-		System.arraycopy(newKey.getBytes(), 0, bytes, offset, newKey.length());
+		int offset = bytesString.indexOf(source);
+		System.arraycopy(replacement.getBytes(), 0, bytes, offset, replacement
+				.length());
 		return bytes;
 	}
 
