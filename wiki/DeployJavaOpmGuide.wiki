@@ -3,6 +3,8 @@
 
 = 在GAE上架设 =
 
+*注意：在某些地区或运营商可能已经无法访问GAE了，电脑能访问手机未必能访问，反之亦然，自己看着办。*
+
 == 准备工作 ==
 
 过程并不复杂，你需要三个软件和一个gmail帐号
@@ -17,9 +19,9 @@
     # 解压GAE 的开发包和Java版的Opm代理服务端，并把后者的文件夹（如“Opm_java”复制到前者的目录下，即“appengine-java-sdk-1.2.6/Opm_java/”
     # 用你喜爱的文本编辑器（记事本也行）修改“Opm_java/war/WEB-INF/appengine-web.xml”文件，找到一行
 {{{
-<application>your_application_name</application>
+<application>application-id</application>
 }}}
-      把“your_application_name”改成你注册到的GAE application id名称，修改好后保存。
+      把“application-id”改成你注册到的GAE application id名称，修改好后保存。
     # 接下来是命令操作了
         * Linux用户，打开终端，进入GAE 的开发包的目录，运行下面代码  
 {{{    
@@ -38,10 +40,11 @@ Update completed successfully.
     # 上传好后测试一下，浏览
 {{{
 http://application-id.appspot.com/opm
+http://application-id.appspot.com/ucweb
 }}}
       如果跳到Google首页，表示成功了。
-    # 接下来修改你的Opera Mini里面的服务器地址为上面的地址吧，不同版本的教程可以从[http://code.google.com/p/opm-server-mirror/w/list Wiki页]获得。
-    # 最后就进行一项体育运动吧。
+    # 接下来修改你的Opera Mini或UCWeb里面的服务器地址为上面的地址吧，不同版本的教程可以从[http://code.google.com/p/opm-server-mirror/w/list Wiki页]获得。
+    # 最后就进行你喜爱的体育运动。
 
 = 在其它Java EE容器上架设 =
     目前只测试过Tomcat
@@ -50,11 +53,11 @@ http://application-id.appspot.com/opm
 = 高级设定 =
 
 == 修改代理网页的地址 ==
-如果你不想用“opm”作为页面，想改成其它名称，如“opm.jsp”之类，可以修改“Opm_java/war/WEB-INF/web.xml”文件，找到下面一行
+如果你不想用“opm”名称作为地址，想改成其它名称，如“opm.jsp”之类，可以修改“Opm_java/war/WEB-INF/web.xml”文件，找到下面一行
 {{{
 <url-pattern>/opm</url-pattern>
 }}}
-把“opm”改成你想要的名称，修改后保存，然后重新上传。
+把“opm”改成你想要的名称，如“opm.jsp”，修改后保存，然后重新上传。
 
 == 编译源代码 ==
 源代码文件放在“src”目录，里面就一个“OpmServlet.java”和“geronimo-servlet_2.5_spec-1.2.jar”文件，修改源代码后，可用下面命令来编译
