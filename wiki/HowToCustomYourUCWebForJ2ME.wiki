@@ -1,18 +1,18 @@
 #summary 如何修改Java（J2ME）版的UCWeb
 
-= 准备工作 =
-
 依照项目Wiki页，搭建UCWeb的代理，跟Opera Mini一样，GAE的Java版或PHP版，方法基本上跟Opera Mini一样，注意UCWeb会挑IP的来返回不同服务器。
     * PHP空间不一定是要国外的，但用国外的更好，有的国外PHP空间IP依然返回国内地址，看人品。
     * GAE版目前还不会，但GAE可能在某些情况下不能访问，所以也是看人品。
     
-然后就修改ucweb的jar文件，这里还是用[http://classeditor.sourceforge.net/ Java Class File Editor]，简称ce，是java程序。如用其它工具，参考本文修改的地方即可。修改的例子版本是下面两个，但不保证以后的版本修改位置都一样，希望大家举一反三。
+然后就修改ucweb的jar文件，修改的例子版本是下面两个，但不保证以后的版本修改位置都一样，希望大家举一反三。
     * [http://wap.ucweb.com/ucpack/filepack/999/71/UCWEB-6.7.0.32-999-71-09102211.jar UCWEB-6.7.0.32-999-71-09102211.jar]
     * [http://wap.uc.cn/ucpack/filepack/999/69/UCWEB-7.0.3.39-999-69-10011919.jar UCWEB-7.0.3.39-999-69-10011919.jar]
 假设代理地址为
 {{{
 http://application-id.appspot.com/ucweb
 }}}
+
+这里还是用[http://classeditor.sourceforge.net/ Java Class File Editor]，简称ce，是java程序，如用其它工具，参考本文修改的地方即可。
 
     # 用压缩工具解压jar，运行ce
         * 6.7 载入“q.class”
