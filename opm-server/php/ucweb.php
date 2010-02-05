@@ -1,28 +1,22 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-	if (function_exists("curl_init")) {
-		if (!$_GET["test"] != null) {
-			header( "HTTP/1.1 301 Moved Permanently" );
-			header( "Location: http://www.google.com/" );
-		} else {
-			echo 'Hello UCWeb Server! Fuck GFW!';
-		}
-	} else {
-		echo 'cURL is not enabled.';
-	}
+    if (!$_GET["test"] != null) {
+        header( "HTTP/1.1 301 Moved Permanently" );
+        header( "Location: http://www.google.com/" );
+    } else {
+        echo 'Hello UCWeb Server! Fuck GFW!';
+    }
 } else {
-	$curlInterface = curl_init();
-	$headers[] = 'Content-Type", "text/xml';
-	$headers[] = 'User-Agent", "Java/1.6.0_15';
-	$headers[] = 'Connection", "keep-alive';
-	curl_setopt_array($curlInterface, array(
-		CURLOPT_URL => 'http://uc.ucweb.com',
-		CURLOPT_HTTPHEADER => $headers,
-		CURLOPT_POST => 1,
-		CURLOPT_POSTFIELDS => @file_get_contents('php://input'))
-    );
-	$result = curl_exec($curlInterface);
-	curl_close($curlInterface);
-	echo $result;
+    $servers = array("67.228.68.101:8086",
+                     "67.228.166.110:8089",
+                     "67.228.166.103:8089",
+                     "67.228.166.108:8090",
+                     "74.86.222.70:8087",
+                     "74.86.222.73:8089",
+                     "74.86.222.81:8087");	
+    //$server = "67.228.68.101:8086";
+    $server = $servers[rand(0, 6)];
+    header("Assign: ".$server);
+    echo "\x00\x06assign\x00\x13".$server;
 }
 ?>
