@@ -1,8 +1,8 @@
 #summary 如何修改Java（J2ME）版的UCWeb
 
-依照项目Wiki页，搭建UCWeb的代理，GAE的Java版或PHP版，方法基本上跟Opera Mini一样，注意UCWeb会挑IP的来返回不同服务器。
-    * PHP空间不一定是要国外的，但用国外的更好，有的国外PHP空间IP依然返回国内地址，看人品。
-    * GAE版目前还不会，但GAE可能在某些情况下不能访问，所以也是看人品。
+依照项目Wiki页，搭建UCWeb的代理，GAE的Java版或PHP版，方法基本上跟Opera Mini一样，改进过的服务端是直接返回服务器IP，并非中转，所以不挑IP，不检测语言标识，不转发隐私信息如手机的imei到ucweb官方（直接丢弃掉）。
+    * 对PHP空间无特别要求，不需curl支持。
+    * GAE的Java上传方法同operamini。
 
 假设代理地址为
 {{{
@@ -26,7 +26,7 @@ grep m_bid ./*.class
     # 运行ce，打开表格中的*class文件*。
     # 点击右上角的按钮，切换成“Modify Mode(on)”
     # 切换到“Constant Pool”选项卡，右边区域里“Filter”选“Utf8“，点击“Apply”。
-    # 查找“999”，选中结果，改成“352”，点击“Modify”（再点击一下修改条目就看到修改结果了）
+    # ~~查找“999”，选中结果，改成“352”，点击“Modify”（再点击一下修改条目就看到修改结果了）~~，不再需要
     # 查找表格中的*域名部分*字符串，改成代理地址的域名，如“application-id.appspot.com”
     # 查找表格中的*地址部分*字符串，注意这里要改的是查找结果条目*上面那个“/”条目*，把“/”改成“/ucweb”
     # 保存修改结果，把修改后的class，打包回jar（拉进原来的jar覆盖即可）。
