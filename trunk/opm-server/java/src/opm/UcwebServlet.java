@@ -1,17 +1,17 @@
 package opm;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletOutputStream;
+import java.util.Random;
 import javax.servlet.http.*;
 
 @SuppressWarnings("serial")
 public class UcwebServlet extends HttpServlet {
+
+	private static final Random random = new Random();
+	private static final String[] servers = { "67.228.68.101:8086",
+			"67.228.166.110:8089", "67.228.166.103:8089",
+			"67.228.166.108:8090", "74.86.222.70:8087", "74.86.222.73:8089",
+			"74.86.222.81:8087" };
 
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
@@ -24,42 +24,12 @@ public class UcwebServlet extends HttpServlet {
 
 	public void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		try {
-			URL url = new URL("http://uc.ucweb.com");
-			HttpURLConnection connection = (HttpURLConnection) url
-					.openConnection();
-			connection.setDoOutput(true);
-			connection.setRequestMethod("POST");
-			connection.setRequestProperty("Content-Type", "text/xml");
-			connection.setRequestProperty("User-Agent", "Java/1.6.0_15");
-			connection.setRequestProperty("Connection", "keep-alive");
-			int length;
-			byte[] buffer = new byte[1024];
-			ServletInputStream req_in = req.getInputStream();
-			OutputStream con_out = connection.getOutputStream();
-			while ((length = req_in.read(buffer)) != -1) {
-				con_out.write(buffer, 0, length);
-			}
-			con_out.flush();
-			con_out.close();
-			req_in.close();
-			if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-				resp.setContentType("text/html");
-				resp.setContentLength(connection.getContentLength());
-				InputStream con_in = connection.getInputStream();
-				ServletOutputStream resp_out = resp.getOutputStream();
-				while ((length = con_in.read(buffer)) != -1) {
-					resp_out.write(buffer, 0, length);
-				}
-				resp_out.flush();
-				resp_out.close();
-				con_in.close();
-			} else {
-				resp.sendError(connection.getResponseCode());
-			}
-		} catch (Exception e) {
-			resp.sendError(HttpURLConnection.HTTP_UNAVAILABLE);
-		}
+		// String server = servers = "67.228.68.101:8086";
+		int index = random.nextInt(servers.length - 1);
+		String server = servers[index];
+		resp.setHeader("Assign", server);
+		resp.getWriter().printf("%c%cassign%c%c%s", 0x00, 0x06, 0x00, 0x13,
+				server);
+		resp.flushBuffer();
 	}
-
 }
