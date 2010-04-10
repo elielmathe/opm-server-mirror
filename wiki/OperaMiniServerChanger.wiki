@@ -4,19 +4,16 @@
 = 简介 =
 
 Opera Mini Server Changer是修改Java版的Opera Mini服务器地址的工具，直接生成修改后的Jar。
-    * 目前支持4.2和5.0beta2的国际版、中国版和实验室版。
+    * 目前支持4.2和5.0国际版、中国版和实验室版。
     * 使用Java编写的，可以运行在Linux、Windows、Mac上。
-    * 目前为 0.1 版，下载地址在[http://code.google.com/p/opm-server-mirror/downloads/list 项目下载页]。
+    * 目前为 0.2 版，下载地址在[http://code.google.com/p/opm-server-mirror/downloads/list 项目下载页]。
 
-http://opm-server-mirror.googlecode.com/svn/wiki/picture/omsc_screenshot.png
+http://dl-web.dropbox.com/u/2992664/wiki/omsc_screenshot.png
 
 = 使用 =
 
 运行需要Java虚拟机，可到[http://www.java.com/zh_CN/ Java官网]下载。
-    # 一般安装后Java虚拟后，会自动关联了jar文件，直接双击即可运行。如果没关联，打开终端执行
-{{{
-java -jar omsc.jar
-}}}
+    # 安装后Java虚拟后，运行omsc.exe即可。
     # 选择jar文件和保存文件，测试一下代理地址，选择Jar版本，点击“修改”，搞定。
     # 复制到手机前你也可以用MicroEmulator来测试一下。
 
@@ -31,12 +28,6 @@ java -jar omsc.jar
 
     * Q：为什么修改后放到手机上出现“软件已损坏或文件无效”的错误。
     A：大概是把Jar和Jad都放在一起，手机上的Java虚拟机通常先读取Jad的信息来找相应的Jar，因为Jar修改后大小已经改变了，和原来的Jad信息不一致而被Java虚拟机直接判断为文件无效。解决方法是直接删掉Jad文件。
-
-    * Q：修改5.0的中国版在第一次运行时出现白屏无相应，只剩一个标题栏。
-    A：OperaMini第一次运行需要联网来完成安装，大概就是中国版特别加入了一些初始化步骤，改服导致获取相关资源失败，所以卡在那里了。这个问题有待研究，目前的临时解决方法是先用原版来完成安装，把网络协议切换到http，退出，在用修改版来替换掉原版的jar。
-
-    * Q：初始化时还是出现使用中国版的提示。
-    A：OperaMini里内置两种网络协议，http和socket，代理网页只支持http，但OperaMini优先使用socket所以出现使用中国版的提示，在设置里切换成http协议就行了。虽然把socket地址改掉能强制使用http，不改留着用来做网络检测，也就是发现http出错了，换成socket看看到底是代理网页问题还是手机信号问题。
 
     * Q：为什么我修改后测试不成功，出现这样那样的错误。
     A：国内手机网络环境复杂，不用手机不同Java虚拟机和不同地区可能有不同效果，无法保证完全没问题，所以请大家给多点耐心自己折腾一下，分享下你的修改经验。
