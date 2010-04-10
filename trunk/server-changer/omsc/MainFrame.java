@@ -49,7 +49,7 @@ public class MainFrame extends JFrame {
 
 	private static final int FRAME_WIDTH = 520;
 	private static final int FRAME_HEIGHT = 460;
-	private static final String FRAME_TITLE = "Opera Mini Server Changer v0.1";
+	private static final String FRAME_TITLE = "Opera Mini Server Changer v0.2";
 
 	public static final String[] SERVER_LINK = { "opm-server-mirror",
 			"http://code.google.com/p/opm-server-mirror/" };
@@ -63,10 +63,10 @@ public class MainFrame extends JFrame {
 			"http://mini.opera.com/download-4/opera-mini-latest-advanced-zh.jar?no_redir&ismobile=false" };
 	public static final String[] INTERNATIONAL_NEXT_JAD = {
 			"Jad",
-			"http://m.opera.com/download-5/opera-mini-latest-advanced-en.jad?no_redir&ismobile=false" };
+			"http://mini.opera.com/download-5/opera-mini-latest-advanced-zh.jad?no_redir&ismobile=false" };
 	public static final String[] INTERNATIONAL_NEXT_JAR = {
 			"Jar",
-			"http://m.opera.com/download-5/opera-mini-latest-advanced-en.jar?no_redir&ismobile=false" };
+			"http://mini.opera.com/download-5/opera-mini-latest-advanced-zh.jar?no_redir&ismobile=false" };
 
 	private JPanel contentPanel;
 	private JButton sourceJarButton, saveJarButton, testServerButton,
@@ -420,7 +420,7 @@ public class MainFrame extends JFrame {
 
 	private void showAboutDialog() {
 		String aboutText;
-		aboutText = "Opera Mini Server Changer v0.1\n under GPLv3 write by muzuiget";
+		aboutText = "Opera Mini Server Changer v0.2\n under GPLv3 write by muzuiget";
 		JOptionPane.showMessageDialog(null, aboutText, "关于",
 				JOptionPane.INFORMATION_MESSAGE);
 	}
