@@ -29,8 +29,9 @@
 }}}
         * Windows则用户，打开“命令提示符”，开始 -> 运行 ->输入cmd回车，进入GAE 的开发包的目录，如
 {{{
-cd D:\appengine-java-sdk-1.2.6
-bin\appcfg.cmd update Opm_java\war
+C:\Documents and Settings\your_name> D:
+D:\> cd D:\appengine-java-sdk-1.2.6
+D:\appengine-java-sdk-1.2.6> bin\appcfg.cmd update Opm_java\war
 }}}
     # 脚本会提示输入你的Email地址，输入你的gmail地址，然后会提示输入密码。*注意：输入密码时不会显示星号的，直接输入去就是。*
     # 等待上传完成，很快的，才几十K的文件，当出现下面一行表示成功了。
