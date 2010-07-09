@@ -49,7 +49,7 @@ public class MainFrame extends JFrame {
 
 	private static final int FRAME_WIDTH = 520;
 	private static final int FRAME_HEIGHT = 460;
-	private static final String FRAME_TITLE = "Opera Mini Server Changer v0.2";
+	private static final String FRAME_TITLE = "Opera Mini Server Changer v0.2.1";
 
 	public static final String[] SERVER_LINK = { "opm-server-mirror",
 			"http://code.google.com/p/opm-server-mirror/" };
@@ -420,7 +420,7 @@ public class MainFrame extends JFrame {
 
 	private void showAboutDialog() {
 		String aboutText;
-		aboutText = "Opera Mini Server Changer v0.2\n under GPLv3 write by muzuiget";
+		aboutText = "Opera Mini Server Changer v0.2.1\n under GPLv3 write by muzuiget";
 		JOptionPane.showMessageDialog(null, aboutText, "关于",
 				JOptionPane.INFORMATION_MESSAGE);
 	}

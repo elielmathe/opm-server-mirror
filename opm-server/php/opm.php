@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 	$result = curl_exec($curlInterface);
 	curl_close($curlInterface);
 	header('Content-Type: application/octet-stream');
-	header('Cache-Control: priavte, no-cache');
+	header('Cache-Control: private, no-cache');
 	echo $result;
 }
 ?>
