@@ -36,20 +36,20 @@ public class OperaMini {
 	static {
 		international = new OperaMini("国际版", "4.2",
 				"http://www.opera.com/mobile/download/versions/",
-				"a.class", "http://server4.operamini.com:80/",
+				"h.class", "http://server4.operamini.com:80/",
 				"socket://server4.operamini.com:1080", false);
-		internationalNext = new OperaMini("国际版", "5.0",
-				"http://www.opera.com/mobile/download/versions/", "f.class",
+		internationalNext = new OperaMini("国际版", "5.1",
+				"http://www.opera.com/mobile/download/versions/", "o.class",
 				"http://mini5.opera-mini.net:80/",
 				"socket://mini5.opera-mini.net:1080", false);
 		china = new OperaMini("中国版", "4.2",
 				"http://www.operachina.com/mini/download/", "g.class",
 				"http://59.151.106.229:80/", "socket://59.151.106.229:1080",
 				true);
-		chinaNext = new OperaMini("中国版", "5.0",
-				"http://www.operachina.com/mini/download/", "f.class",
-				"http://china-4.opera-mini.net:80/",
-				"socket://china-4.opera-mini.net:1080", true);
+		chinaNext = new OperaMini("中国版", "5.1",
+				"http://www.operachina.com/mini/download/", "o.class",
+				"http://mini5cn.opera-mini.net:80/",
+				"socket://mini5cn.opera-mini.net:1080", true);
 		chinaLab = new OperaMini("实验室版", "4.2",
 				"http://www.operachina.com/id/", "I.class",
 				"http://china-4.opera-mini.net:80/",
