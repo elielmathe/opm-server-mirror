@@ -14,6 +14,7 @@ import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,8 +30,11 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.bytecode.ConstPool;
+
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -49,7 +53,7 @@ public class MainFrame extends JFrame {
 
 	private static final int FRAME_WIDTH = 520;
 	private static final int FRAME_HEIGHT = 460;
-	private static final String FRAME_TITLE = "Opera Mini Server Changer v0.2.1";
+	private static final String FRAME_TITLE = "Opera Mini Server Changer v0.2.2";
 
 	public static final String[] SERVER_LINK = { "opm-server-mirror",
 			"http://code.google.com/p/opm-server-mirror/" };
@@ -73,7 +77,6 @@ public class MainFrame extends JFrame {
 			aboutButton, exitButton, convertButton;
 	private JTextField sourceJarTextField, saveJarTextField,
 			testServerTextField;
-	private JComboBox versionComboBox;
 	private LinkLabel serverLinkLabel, clientLinkLabel, clientNextLinkLabel,
 			clientCHNLinkLabel, clientNextCHNLinkLabel, clientLABLinkLabel,
 			emulatorLinkLabel;
@@ -89,6 +92,9 @@ public class MainFrame extends JFrame {
 	private enum MessageType {
 		NORMAL, INFO, TIPS, WARRING, ERROR
 	};
+
+	private OperaMini operaMini;
+	private ClassPool classPool;
 
 	public MainFrame() {
 		initComponents();
@@ -117,18 +123,17 @@ public class MainFrame extends JFrame {
 		sourceJarTextField = new JTextField();
 		saveJarTextField = new JTextField();
 		testServerTextField = new JTextField();
-		versionComboBox = new JComboBox(OperaMini.operaMiniItems);
 		serverLinkLabel = new LinkLabel(SERVER_LINK);
 		clientLinkLabel = new LinkLabel(OperaMini.international.getLabelText());
 		clientJadLinkLabel = new LinkLabel(INTERNATIONAL_JAD);
 		clientJarLinkLabel = new LinkLabel(INTERNATIONAL_JAR);
-		clientNextLinkLabel = new LinkLabel(OperaMini.internationalNext
-				.getLabelText());
+		clientNextLinkLabel = new LinkLabel(
+				OperaMini.internationalNext.getLabelText());
 		clientNextJadLinkLabel = new LinkLabel(INTERNATIONAL_NEXT_JAD);
 		clientNextJarLinkLabel = new LinkLabel(INTERNATIONAL_NEXT_JAR);
 		clientCHNLinkLabel = new LinkLabel(OperaMini.china.getLabelText());
-		clientNextCHNLinkLabel = new LinkLabel(OperaMini.chinaNext
-				.getLabelText());
+		clientNextCHNLinkLabel = new LinkLabel(
+				OperaMini.chinaNext.getLabelText());
 		clientLABLinkLabel = new LinkLabel(OperaMini.chinaLab.getLabelText());
 		emulatorLinkLabel = new LinkLabel(EMULATOR_LINK);
 		messageTextArea = new JTextArea();
@@ -205,10 +210,6 @@ public class MainFrame extends JFrame {
 		northPanel.add(testServerTextField, constraintFill);
 		northPanel.add(testServerButton, constraintEnd);
 
-		northPanel.add(new JLabel("Jar版本:"), constraintLabel);
-		northPanel.add(versionComboBox, constraintFill);
-		northPanel.add(convertButton, constraintEnd);
-
 		// center panel
 		JPanel centerPanel = new JPanel();
 		centerPanel.setBorder(new CompoundBorder(new TitledBorder("信息"),
@@ -261,6 +262,7 @@ public class MainFrame extends JFrame {
 		// south panel
 		JPanel southPanel = new JPanel();
 		southPanel.setLayout(new FlowLayout(FlowLayout.TRAILING));
+		southPanel.add(convertButton, constraintEnd);
 		southPanel.add(aboutButton, constraintEnd);
 		southPanel.add(exitButton, constraintEnd);
 
@@ -276,11 +278,10 @@ public class MainFrame extends JFrame {
 		if (option == JFileChooser.APPROVE_OPTION) {
 			String path = jarFileChooser.getSelectedFile().getPath();
 			sourceJarTextField.setText(path);
-			if (saveJarTextField.getText().trim().isEmpty()) {
-				String autoSavePath = path.substring(0, path.length() - 4)
-						+ "-mod.jar";
-				saveJarTextField.setText(autoSavePath);
-			}
+			String autoSavePath = path.substring(0, path.length() - 4)
+					+ "-mod.jar";
+			saveJarTextField.setText(autoSavePath);
+			checkJarInfo();
 		}
 	}
 
@@ -348,7 +349,6 @@ public class MainFrame extends JFrame {
 		String sourceFilePath = sourceJarTextField.getText().trim();
 		String saveFilePath = saveJarTextField.getText().trim();
 		String newServer = testServerTextField.getText().trim();
-		OperaMini operaMini = (OperaMini) versionComboBox.getSelectedItem();
 
 		if (sourceFilePath.isEmpty() || saveFilePath.isEmpty()
 				|| newServer.isEmpty()) {
@@ -357,6 +357,9 @@ public class MainFrame extends JFrame {
 		}
 
 		try {
+			if (operaMini == null) {
+				checkJarInfo();
+			}
 			ZipFile sourceJar = new ZipFile(sourceFilePath);
 			File saveJar = new File(saveFilePath);
 			saveJar.createNewFile();
@@ -368,19 +371,45 @@ public class MainFrame extends JFrame {
 			while (entries.hasMoreElements()) {
 				ZipEntry entry = entries.nextElement();
 				InputStream in = sourceJar.getInputStream(entry);
-				byte[] zipEntryBytes = Changer.readAlltoBytes(in);
+				byte[] zipEntryBytes;
 
-				// if entry is the class file which need to change
 				if (entry.getName().equals(operaMini.classFile)) {
-					zipEntryBytes = Changer.replaceClassBytesString(
-							zipEntryBytes, operaMini.httpServer, newServer);
-					zipEntryBytes = Changer.replaceClassBytesString(
-							zipEntryBytes, operaMini.socketServer, newServer);
-					if (operaMini.changerKey) {
-						zipEntryBytes = Changer.replaceBytesString(
-								zipEntryBytes, OperaMini.CHINA_SERVER_KEY,
-								OperaMini.SERVER_KEY);
+					// preverification for J2ME class
+					// javassist.bytecode.MethodInfo.doPreverify = false;
+
+					String className = operaMini.classFile.split("\\.")[0];
+					CtClass cc = classPool.get(className);
+					ConstPool cp = cc.getClassFile().getConstPool();
+					for (int i = 1; i < cp.getSize(); i++) {
+						int tag = cp.getTag(i);
+						if (tag == ConstPool.CONST_Utf8) {
+							String utf8 = cp.getUtf8Info(i);
+							if (utf8.equals(operaMini.httpServer)
+									|| utf8.equals(operaMini.socketServer)) {
+								cp.changeUtf8Info(i, newServer);
+								continue;
+							}
+							if (operaMini.changerKey
+									&& utf8.equals(OperaMini.CHINA_SERVER_KEY)) {
+								cp.changeUtf8Info(i, OperaMini.SERVER_KEY);
+								continue;
+							}
+						}
 					}
+					zipEntryBytes = cc.toBytecode();
+					cc.defrost();
+				} else {
+					// just copy
+					int readLength;
+					byte[] buffer = new byte[10240];
+					ByteArrayOutputStream out = new ByteArrayOutputStream();
+					while ((readLength = in.read(buffer)) != -1) {
+						out.write(buffer, 0, readLength);
+					}
+					out.flush();
+					out.close();
+					in.close();
+					zipEntryBytes = out.toByteArray();
 				}
 
 				zip_out.putNextEntry(new ZipEntry(entry.getName()));
@@ -394,6 +423,80 @@ public class MainFrame extends JFrame {
 		} catch (Exception e) {
 			e.printStackTrace();
 			printMessage(MessageType.ERROR, "转换失败，可能是Jar版本不对或已被转换。");
+		}
+
+	}
+
+	private void checkJarInfo() {
+		String sourceFilePath = sourceJarTextField.getText().trim();
+		String version = null;
+		String type = null;
+		String addressInClass = null;
+		int founded = 0; // if version and type founded, value is 2
+		classPool = ClassPool.getDefault();
+		try {
+			ZipFile sourceJar = new ZipFile(sourceFilePath);
+			Enumeration<? extends ZipEntry> entries = sourceJar.entries();
+
+			while (entries.hasMoreElements() && founded < 2) {
+				ZipEntry entry = entries.nextElement();
+				InputStream in = sourceJar.getInputStream(entry);
+
+				if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+					byte[] zipEntryBytes = new byte[(int) entry.getSize()];
+					in.read(zipEntryBytes);
+					String manifest = new String(zipEntryBytes);
+					String[] lines = manifest.split("\n");
+					for (String line : lines) {
+						if (line.startsWith("MIDlet-Version")) {
+							version = line.split(": ")[1];
+							founded += 1;
+						}
+					}
+					continue;
+				}
+
+				if (entry.getName().endsWith(".class")) {
+					CtClass cc = classPool.makeClass(in);
+					ConstPool cp = cc.getClassFile().getConstPool();
+					for (int i = 1; i < cp.getSize(); i++) {
+						int tag = cp.getTag(i);
+						if (tag == ConstPool.CONST_Utf8) {
+							String utf8 = cp.getUtf8Info(i);
+							if (utf8.startsWith("c1dd7ab77e")) {
+								type = "国际版";
+								addressInClass = entry.getName();
+								founded += 1;
+								break;
+							}
+							if (utf8.startsWith("8c60d2a681")) {
+								type = "中国版";
+								addressInClass = entry.getName();
+								founded += 1;
+								break;
+							}
+						}
+					}
+				}
+			}
+			// setup operamini object ot motify
+			if (version.startsWith("4") && type.equals("国际版")) {
+				operaMini = OperaMini.international;
+			} else if (version.startsWith("5") && type.equals("国际版")) {
+				operaMini = OperaMini.internationalNext;
+			} else if (version.startsWith("4") && type.equals("中国版")) {
+				operaMini = OperaMini.china;
+			} else if (version.startsWith("5") && type.equals("中国版")) {
+				operaMini = OperaMini.chinaNext;
+			}
+			operaMini.setClassFile(addressInClass);
+			String message = String.format("Opera Mini %s %s, 地址在%s", version,
+					type, addressInClass);
+			printMessage(MessageType.INFO, message);
+			sourceJar.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			printMessage(MessageType.ERROR, "不支持的版本。");
 		}
 
 	}
@@ -420,7 +523,7 @@ public class MainFrame extends JFrame {
 
 	private void showAboutDialog() {
 		String aboutText;
-		aboutText = "Opera Mini Server Changer v0.2.1\n under GPLv3 write by muzuiget";
+		aboutText = "Opera Mini Server Changer v0.2.2\n under GPLv3 write by muzuiget";
 		JOptionPane.showMessageDialog(null, aboutText, "关于",
 				JOptionPane.INFORMATION_MESSAGE);
 	}
