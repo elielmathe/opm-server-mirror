@@ -25,15 +25,11 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
-
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.bytecode.ConstPool;
-
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -59,18 +55,6 @@ public class MainFrame extends JFrame {
 			"http://code.google.com/p/opm-server-mirror/" };
 	public static final String[] EMULATOR_LINK = { "MicroEmulator",
 			"http://code.google.com/p/microemu/downloads/list" };
-	public static final String[] INTERNATIONAL_JAD = {
-			"Jad",
-			"http://mini.opera.com/download-4/opera-mini-latest-advanced-zh.jad?no_redir&ismobile=false" };
-	public static final String[] INTERNATIONAL_JAR = {
-			"Jar",
-			"http://mini.opera.com/download-4/opera-mini-latest-advanced-zh.jar?no_redir&ismobile=false" };
-	public static final String[] INTERNATIONAL_NEXT_JAD = {
-			"Jad",
-			"http://mini.opera.com/download-5/opera-mini-latest-advanced-zh.jad?no_redir&ismobile=false" };
-	public static final String[] INTERNATIONAL_NEXT_JAR = {
-			"Jar",
-			"http://mini.opera.com/download-5/opera-mini-latest-advanced-zh.jar?no_redir&ismobile=false" };
 
 	private JPanel contentPanel;
 	private JButton sourceJarButton, saveJarButton, testServerButton,
@@ -80,8 +64,6 @@ public class MainFrame extends JFrame {
 	private LinkLabel serverLinkLabel, clientLinkLabel, clientNextLinkLabel,
 			clientCHNLinkLabel, clientNextCHNLinkLabel, clientLABLinkLabel,
 			emulatorLinkLabel;
-	private LinkLabel clientJadLinkLabel, clientJarLinkLabel,
-			clientNextJadLinkLabel, clientNextJarLinkLabel;
 	private JTextArea messageTextArea;
 
 	private LinkLabelMouseAdapter linkLabelMouseAdapter;
@@ -94,7 +76,6 @@ public class MainFrame extends JFrame {
 	};
 
 	private OperaMini operaMini;
-	private ClassPool classPool;
 
 	public MainFrame() {
 		initComponents();
@@ -125,12 +106,8 @@ public class MainFrame extends JFrame {
 		testServerTextField = new JTextField();
 		serverLinkLabel = new LinkLabel(SERVER_LINK);
 		clientLinkLabel = new LinkLabel(OperaMini.international.getLabelText());
-		clientJadLinkLabel = new LinkLabel(INTERNATIONAL_JAD);
-		clientJarLinkLabel = new LinkLabel(INTERNATIONAL_JAR);
 		clientNextLinkLabel = new LinkLabel(
 				OperaMini.internationalNext.getLabelText());
-		clientNextJadLinkLabel = new LinkLabel(INTERNATIONAL_NEXT_JAD);
-		clientNextJarLinkLabel = new LinkLabel(INTERNATIONAL_NEXT_JAR);
 		clientCHNLinkLabel = new LinkLabel(OperaMini.china.getLabelText());
 		clientNextCHNLinkLabel = new LinkLabel(
 				OperaMini.chinaNext.getLabelText());
@@ -227,11 +204,7 @@ public class MainFrame extends JFrame {
 		JPanel clientLinksPanel = new JPanel();
 		clientLinksPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 0));
 		clientLinksPanel.add(clientLinkLabel);
-		clientLinksPanel.add(clientJadLinkLabel);
-		clientLinksPanel.add(clientJarLinkLabel);
 		clientLinksPanel.add(clientNextLinkLabel);
-		clientLinksPanel.add(clientNextJadLinkLabel);
-		clientLinksPanel.add(clientNextJarLinkLabel);
 		JPanel clientCHNLinksPanel = new JPanel();
 		clientCHNLinksPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 0));
 		clientCHNLinksPanel.add(clientCHNLinkLabel);
@@ -371,45 +344,19 @@ public class MainFrame extends JFrame {
 			while (entries.hasMoreElements()) {
 				ZipEntry entry = entries.nextElement();
 				InputStream in = sourceJar.getInputStream(entry);
-				byte[] zipEntryBytes;
+				byte[] zipEntryBytes = Changer.readAlltoBytes(in);
 
+				// if entry is the class file which need to change
 				if (entry.getName().equals(operaMini.classFile)) {
-					// preverification for J2ME class
-					// javassist.bytecode.MethodInfo.doPreverify = false;
-
-					String className = operaMini.classFile.split("\\.")[0];
-					CtClass cc = classPool.get(className);
-					ConstPool cp = cc.getClassFile().getConstPool();
-					for (int i = 1; i < cp.getSize(); i++) {
-						int tag = cp.getTag(i);
-						if (tag == ConstPool.CONST_Utf8) {
-							String utf8 = cp.getUtf8Info(i);
-							if (utf8.equals(operaMini.httpServer)
-									|| utf8.equals(operaMini.socketServer)) {
-								cp.changeUtf8Info(i, newServer);
-								continue;
-							}
-							if (operaMini.changerKey
-									&& utf8.equals(OperaMini.CHINA_SERVER_KEY)) {
-								cp.changeUtf8Info(i, OperaMini.SERVER_KEY);
-								continue;
-							}
-						}
+					zipEntryBytes = Changer.replaceClassBytesString(
+							zipEntryBytes, operaMini.httpServer, newServer);
+					zipEntryBytes = Changer.replaceClassBytesString(
+							zipEntryBytes, operaMini.socketServer, newServer);
+					if (operaMini.changerKey) {
+						zipEntryBytes = Changer.replaceBytesString(
+								zipEntryBytes, OperaMini.CHINA_SERVER_KEY,
+								OperaMini.SERVER_KEY);
 					}
-					zipEntryBytes = cc.toBytecode();
-					cc.defrost();
-				} else {
-					// just copy
-					int readLength;
-					byte[] buffer = new byte[10240];
-					ByteArrayOutputStream out = new ByteArrayOutputStream();
-					while ((readLength = in.read(buffer)) != -1) {
-						out.write(buffer, 0, readLength);
-					}
-					out.flush();
-					out.close();
-					in.close();
-					zipEntryBytes = out.toByteArray();
 				}
 
 				zip_out.putNextEntry(new ZipEntry(entry.getName()));
@@ -429,11 +376,9 @@ public class MainFrame extends JFrame {
 
 	private void checkJarInfo() {
 		String sourceFilePath = sourceJarTextField.getText().trim();
-		String version = null;
-		String type = null;
-		String addressInClass = null;
-		int founded = 0; // if version and type founded, value is 2
-		classPool = ClassPool.getDefault();
+		String jarVersion = null;
+		String classFile = null;
+		int founded = 0;
 		try {
 			ZipFile sourceJar = new ZipFile(sourceFilePath);
 			Enumeration<? extends ZipEntry> entries = sourceJar.entries();
@@ -441,15 +386,15 @@ public class MainFrame extends JFrame {
 			while (entries.hasMoreElements() && founded < 2) {
 				ZipEntry entry = entries.nextElement();
 				InputStream in = sourceJar.getInputStream(entry);
+				byte[] zipEntryBytes = Changer.readAlltoBytes(in);
 
 				if (entry.getName().equals("META-INF/MANIFEST.MF")) {
-					byte[] zipEntryBytes = new byte[(int) entry.getSize()];
 					in.read(zipEntryBytes);
 					String manifest = new String(zipEntryBytes);
 					String[] lines = manifest.split("\n");
 					for (String line : lines) {
 						if (line.startsWith("MIDlet-Version")) {
-							version = line.split(": ")[1];
+							jarVersion = line.split(": ")[1];
 							founded += 1;
 						}
 					}
@@ -457,41 +402,22 @@ public class MainFrame extends JFrame {
 				}
 
 				if (entry.getName().endsWith(".class")) {
-					CtClass cc = classPool.makeClass(in);
-					ConstPool cp = cc.getClassFile().getConstPool();
-					for (int i = 1; i < cp.getSize(); i++) {
-						int tag = cp.getTag(i);
-						if (tag == ConstPool.CONST_Utf8) {
-							String utf8 = cp.getUtf8Info(i);
-							if (utf8.startsWith("c1dd7ab77e")) {
-								type = "国际版";
-								addressInClass = entry.getName();
-								founded += 1;
-								break;
-							}
-							if (utf8.startsWith("8c60d2a681")) {
-								type = "中国版";
-								addressInClass = entry.getName();
-								founded += 1;
-								break;
-							}
+					String bytesString = new String(zipEntryBytes,
+							Charset.forName("US-ASCII"));
+					for (OperaMini opmi : OperaMini.operaMiniItems) {
+						if (bytesString.indexOf(opmi.httpServer) != -1) {
+							operaMini = opmi;
+							classFile = entry.getName();
+							founded += 1;
+							break;
 						}
 					}
 				}
 			}
-			// setup operamini object ot motify
-			if (version.startsWith("4") && type.equals("国际版")) {
-				operaMini = OperaMini.international;
-			} else if (version.startsWith("5") && type.equals("国际版")) {
-				operaMini = OperaMini.internationalNext;
-			} else if (version.startsWith("4") && type.equals("中国版")) {
-				operaMini = OperaMini.china;
-			} else if (version.startsWith("5") && type.equals("中国版")) {
-				operaMini = OperaMini.chinaNext;
-			}
-			operaMini.setClassFile(addressInClass);
-			String message = String.format("Opera Mini %s %s, 地址在%s", version,
-					type, addressInClass);
+			operaMini.setJarVersion(jarVersion);
+			operaMini.setClassFile(classFile);
+			String message = String.format("Opera Mini %s %s, 服务器地址在 %s 文件中。",
+					jarVersion, operaMini.name, classFile);
 			printMessage(MessageType.INFO, message);
 			sourceJar.close();
 		} catch (Exception e) {
@@ -557,11 +483,7 @@ public class MainFrame extends JFrame {
 		convertButton.addMouseListener(buttonMouseAdapter);
 		serverLinkLabel.addMouseListener(linkLabelMouseAdapter);
 		clientLinkLabel.addMouseListener(linkLabelMouseAdapter);
-		clientJadLinkLabel.addMouseListener(linkLabelMouseAdapter);
-		clientJarLinkLabel.addMouseListener(linkLabelMouseAdapter);
 		clientNextLinkLabel.addMouseListener(linkLabelMouseAdapter);
-		clientNextJadLinkLabel.addMouseListener(linkLabelMouseAdapter);
-		clientNextJarLinkLabel.addMouseListener(linkLabelMouseAdapter);
 		clientCHNLinkLabel.addMouseListener(linkLabelMouseAdapter);
 		clientNextCHNLinkLabel.addMouseListener(linkLabelMouseAdapter);
 		clientLABLinkLabel.addMouseListener(linkLabelMouseAdapter);
