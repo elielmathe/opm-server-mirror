@@ -389,7 +389,6 @@ public class MainFrame extends JFrame {
 				byte[] zipEntryBytes = Changer.readAlltoBytes(in);
 
 				if (entry.getName().equals("META-INF/MANIFEST.MF")) {
-					in.read(zipEntryBytes);
 					String manifest = new String(zipEntryBytes);
 					String[] lines = manifest.split("\n");
 					for (String line : lines) {
