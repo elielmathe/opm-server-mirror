@@ -8,10 +8,10 @@ import javax.servlet.http.*;
 public class UcwebServlet extends HttpServlet {
 
 	private static final Random random = new Random();
-	private static final String[] servers = { "67.228.68.101:8086",
-			"67.228.166.110:8089", "67.228.166.103:8089",
-			"67.228.166.108:8090", "74.86.222.70:8087", "74.86.222.73:8089",
-			"74.86.222.81:8087" };
+	private static final String[] servers = { "75.126.123.205:8086",
+			"75.126.123.206:8089", "75.126.123.208:8089",
+			"75.126.123.209:8090", "75.126.123.210:8087", "75.126.123.211:8089",
+			"75.126.123.212:8087" };
 
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
