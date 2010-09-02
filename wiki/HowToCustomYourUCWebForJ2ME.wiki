@@ -8,7 +8,7 @@
 
     * 暴破：7.3版本后ucweb为了防止改服，采取了一些手段：虚假服务器地址，真实地址加密（运行时才计算出来），并更改认证协议，因此代理方法失效，要暴力破解，即直接修改程序关键语句（就是Java字节码），将外国服务器地址直接写入到程序中。获取服务器的行为依然存在（因为程序初始化要执行这个操作，搞掉它比较麻烦），但是ucweb.com返回的服务器会被忽略。注意手机识别信息仍然会发送到ucweb.com。
 
-下载页中有已修改好的6.7-7.3。
+下载页中有已修改好的可用的版本。
 
 代理版的伪装网页在Google的GAE平台，暴破版所用的外国服务器地址为75.126.123.208:8089，你可以使用Java Class Editor查找这个字符串来修改为其它服务器。
 6.7-7.2推荐使用代理版，因为可忽略手机识别信息，如果你的手机运营商禁止访问GAE，可选择暴破版，7.3以后只能用暴破方法。
@@ -26,7 +26,7 @@
 http://application-id.appspot.com/ucweb
 }}}
     
-然后就修改ucweb的jar文件，用压缩工具解压UCWeb的jar文件，这里还是用[http://classeditor.sourceforge.net/ Java Class File Editor]，简称ce，是java程序，也可用其它类似工具，修改信息如下面表格
+然后就修改ucweb的jar文件，用压缩工具解压UCWeb的jar文件，这里还是用[http://sourceforge.net/projects/classeditor/files/ Java Class File Editor]，简称ce，是java程序，也可用其它类似工具，修改信息如下面表格
 
 || *版本* || *测试文件* || *class文件* (注1) || *域名部分* || *地址部分* (注2) ||
 || 6.7 || [http://wap.ucweb.com/ucpack/filepack/999/71/UCWEB-6.7.0.32-999-71-09102211.jar UCWEB-6.7.0.32-999-71-09102211.jar] || q.class || uc.ucweb.com:18075 || /?ucid ||
