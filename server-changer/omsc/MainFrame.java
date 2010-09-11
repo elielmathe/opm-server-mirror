@@ -14,22 +14,14 @@ import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.Enumeration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -45,31 +37,34 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 
+@SuppressWarnings("serial")
 public class MainFrame extends JFrame {
 
 	private static final int FRAME_WIDTH = 520;
 	private static final int FRAME_HEIGHT = 460;
-	private static final String FRAME_TITLE = "Opera Mini Server Changer v0.2.2";
+	private static final String VERSION = "v0.3";
+	private static final String FRAME_TITLE = "Opera Mini 服务器地址修改器 " + VERSION;
 
 	public static final String[] SERVER_LINK = { "opm-server-mirror",
 			"http://code.google.com/p/opm-server-mirror/" };
+	public static final String[] CLIENT_LINK = { "Opera Mini",
+			"http://www.opera.com/mobile/download/versions/" };
 	public static final String[] EMULATOR_LINK = { "MicroEmulator",
 			"http://code.google.com/p/microemu/downloads/list" };
 
 	private JPanel contentPanel;
-	private JButton sourceJarButton, saveJarButton, testServerButton,
+	private JButton openFilePathButton, saveFilePathButton, newServerUrlButton,
 			aboutButton, exitButton, convertButton;
-	private JTextField sourceJarTextField, saveJarTextField,
-			testServerTextField;
-	private LinkLabel serverLinkLabel, clientLinkLabel, clientNextLinkLabel,
-			clientCHNLinkLabel, clientNextCHNLinkLabel, clientLABLinkLabel,
-			emulatorLinkLabel;
+	private JTextField openFilePathTextField, saveFilePathTextField,
+			newServerUrlTextField;
+	private LinkLabel serverLinkLabel, clientLinkLabel, emulatorLinkLabel;
 	private JTextArea messageTextArea;
 
 	private LinkLabelMouseAdapter linkLabelMouseAdapter;
 	private ButtonMouseAdapter buttonMouseAdapter;
 
-	private JFileChooser jarFileChooser;
+	private JFileChooser openFilePathChooser;
+	private OpenFileFilter openFileFilter;
 
 	private enum MessageType {
 		NORMAL, INFO, TIPS, WARRING, ERROR
@@ -95,28 +90,23 @@ public class MainFrame extends JFrame {
 
 	private void initComponents() {
 		// interactive components
-		sourceJarButton = new JButton("浏览");
-		saveJarButton = new JButton("浏览");
-		testServerButton = new JButton("测试");
+		openFilePathButton = new JButton("浏览");
+		saveFilePathButton = new JButton("浏览");
+		newServerUrlButton = new JButton("测试");
 		aboutButton = new JButton("关于");
 		exitButton = new JButton("退出");
 		convertButton = new JButton("修改");
-		sourceJarTextField = new JTextField();
-		saveJarTextField = new JTextField();
-		testServerTextField = new JTextField();
+		openFilePathTextField = new JTextField();
+		saveFilePathTextField = new JTextField();
+		newServerUrlTextField = new JTextField();
 		serverLinkLabel = new LinkLabel(SERVER_LINK);
-		clientLinkLabel = new LinkLabel(OperaMini.international.getLabelText());
-		clientNextLinkLabel = new LinkLabel(
-				OperaMini.internationalNext.getLabelText());
-		clientCHNLinkLabel = new LinkLabel(OperaMini.china.getLabelText());
-		clientNextCHNLinkLabel = new LinkLabel(
-				OperaMini.chinaNext.getLabelText());
-		clientLABLinkLabel = new LinkLabel(OperaMini.chinaLab.getLabelText());
+		clientLinkLabel = new LinkLabel(CLIENT_LINK);
 		emulatorLinkLabel = new LinkLabel(EMULATOR_LINK);
 		messageTextArea = new JTextArea();
 		linkLabelMouseAdapter = new LinkLabelMouseAdapter();
 		buttonMouseAdapter = new ButtonMouseAdapter();
-		jarFileChooser = new JFileChooser();
+		openFilePathChooser = new JFileChooser();
+		openFileFilter = new OpenFileFilter();
 	}
 
 	private void setupGUI() {
@@ -175,17 +165,17 @@ public class MainFrame extends JFrame {
 				new EmptyBorder(0, 6, 6, 6)));
 		northPanel.setLayout(new GridBagLayout());
 
-		northPanel.add(new JLabel("原版Jar文件:"), constraintLabel);
-		northPanel.add(sourceJarTextField, constraintFill);
-		northPanel.add(sourceJarButton, constraintEnd);
+		northPanel.add(new JLabel("打开文件:"), constraintLabel);
+		northPanel.add(openFilePathTextField, constraintFill);
+		northPanel.add(openFilePathButton, constraintEnd);
 
-		northPanel.add(new JLabel("保存Jar文件:"), constraintLabel);
-		northPanel.add(saveJarTextField, constraintFill);
-		northPanel.add(saveJarButton, constraintEnd);
+		northPanel.add(new JLabel("保存文件:"), constraintLabel);
+		northPanel.add(saveFilePathTextField, constraintFill);
+		northPanel.add(saveFilePathButton, constraintEnd);
 
 		northPanel.add(new JLabel("代理网址:"), constraintLabel);
-		northPanel.add(testServerTextField, constraintFill);
-		northPanel.add(testServerButton, constraintEnd);
+		northPanel.add(newServerUrlTextField, constraintFill);
+		northPanel.add(newServerUrlButton, constraintEnd);
 
 		// center panel
 		JPanel centerPanel = new JPanel();
@@ -204,12 +194,6 @@ public class MainFrame extends JFrame {
 		JPanel clientLinksPanel = new JPanel();
 		clientLinksPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 0));
 		clientLinksPanel.add(clientLinkLabel);
-		clientLinksPanel.add(clientNextLinkLabel);
-		JPanel clientCHNLinksPanel = new JPanel();
-		clientCHNLinksPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 0));
-		clientCHNLinksPanel.add(clientCHNLinkLabel);
-		clientCHNLinksPanel.add(clientNextCHNLinkLabel);
-		clientCHNLinksPanel.add(clientLABLinkLabel);
 
 		JPanel emulatorLinksPanel = new JPanel();
 		emulatorLinksPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 0));
@@ -217,10 +201,8 @@ public class MainFrame extends JFrame {
 
 		linksPanel.add(new JLabel("代理服务端下载："), constraintLabel);
 		linksPanel.add(serverLinksPanel, constraintFillEnd);
-		linksPanel.add(new JLabel("国际版下载："), constraintLabel);
+		linksPanel.add(new JLabel("手机客户端下载："), constraintLabel);
 		linksPanel.add(clientLinksPanel, constraintFillEnd);
-		linksPanel.add(new JLabel("中国版下载："), constraintLabel);
-		linksPanel.add(clientCHNLinksPanel, constraintFillEnd);
 		linksPanel.add(new JLabel("Java ME 模拟器："), constraintLabel);
 		linksPanel.add(emulatorLinksPanel, constraintFillEnd);
 
@@ -246,39 +228,42 @@ public class MainFrame extends JFrame {
 	}
 
 	private void selectSourceJarFile() {
-		jarFileChooser.setFileFilter(new JarFileFilter());
-		int option = jarFileChooser.showOpenDialog(null);
+		openFilePathChooser.setFileFilter(openFileFilter);
+		int option = openFilePathChooser.showOpenDialog(null);
 		if (option == JFileChooser.APPROVE_OPTION) {
-			String path = jarFileChooser.getSelectedFile().getPath();
-			sourceJarTextField.setText(path);
-			String autoSavePath = path.substring(0, path.length() - 4)
-					+ "-mod.jar";
-			saveJarTextField.setText(autoSavePath);
-			checkJarInfo();
+			String path = openFilePathChooser.getSelectedFile().getPath();
+			openFilePathTextField.setText(path);
+			// add "-mod" to filename
+			String filename = path.substring(0, path.length() - 4) + "-mod";
+			String extension = path.substring(path.length() - 4);
+			String autoSavePath = filename + extension;
+			saveFilePathTextField.setText(autoSavePath);
+
+			checkOperaMiniInfo();
 		}
 	}
 
 	private void selectSaveJarFile() {
-		jarFileChooser.setFileFilter(new JarFileFilter());
-		int option = jarFileChooser.showSaveDialog(null);
+		openFilePathChooser.setFileFilter(openFileFilter);
+		int option = openFilePathChooser.showSaveDialog(null);
 		if (option == JFileChooser.APPROVE_OPTION) {
-			String path = jarFileChooser.getSelectedFile().getPath();
+			String path = openFilePathChooser.getSelectedFile().getPath();
 			if (!path.endsWith(".jar")) {
 				path += ".jar";
 			}
-			saveJarTextField.setText(path);
+			saveFilePathTextField.setText(path);
 		}
 	}
 
 	private void testProxyServer() {
-		String urlText = testServerTextField.getText().trim();
+		String urlText = newServerUrlTextField.getText().trim();
 		if (urlText.isEmpty()) {
 			printMessage(MessageType.ERROR, "未输入代理网址。");
 			return;
 		}
 		if (!urlText.startsWith("http://")) {
 			urlText = "http://" + urlText;
-			testServerTextField.setText(urlText);
+			newServerUrlTextField.setText(urlText);
 		}
 		if (urlText.indexOf("/", "http://".length()) == -1) {
 			urlText += "/";
@@ -319,106 +304,45 @@ public class MainFrame extends JFrame {
 	}
 
 	private void doConvert() {
-		String sourceFilePath = sourceJarTextField.getText().trim();
-		String saveFilePath = saveJarTextField.getText().trim();
-		String newServer = testServerTextField.getText().trim();
+		String saveFilePath = saveFilePathTextField.getText().trim();
+		String newServerUrl = newServerUrlTextField.getText().trim();
 
-		if (sourceFilePath.isEmpty() || saveFilePath.isEmpty()
-				|| newServer.isEmpty()) {
+		if (saveFilePath.isEmpty() || newServerUrl.isEmpty()) {
 			printMessage(MessageType.ERROR, "未完整输入全部选项。");
 			return;
 		}
 
 		try {
-			if (operaMini == null) {
-				checkJarInfo();
-			}
-			ZipFile sourceJar = new ZipFile(sourceFilePath);
-			File saveJar = new File(saveFilePath);
-			saveJar.createNewFile();
-			ZipOutputStream zip_out = new ZipOutputStream(new FileOutputStream(
-					saveJar));
-
-			Enumeration<? extends ZipEntry> entries = sourceJar.entries();
-
-			while (entries.hasMoreElements()) {
-				ZipEntry entry = entries.nextElement();
-				InputStream in = sourceJar.getInputStream(entry);
-				byte[] zipEntryBytes = Changer.readAlltoBytes(in);
-
-				// if entry is the class file which need to change
-				if (entry.getName().equals(operaMini.classFile)) {
-					zipEntryBytes = Changer.replaceClassBytesString(
-							zipEntryBytes, operaMini.httpServer, newServer);
-					zipEntryBytes = Changer.replaceClassBytesString(
-							zipEntryBytes, operaMini.socketServer, newServer);
-					if (operaMini.changerKey) {
-						zipEntryBytes = Changer.replaceBytesString(
-								zipEntryBytes, OperaMini.CHINA_SERVER_KEY,
-								OperaMini.SERVER_KEY);
-					}
-				}
-
-				zip_out.putNextEntry(new ZipEntry(entry.getName()));
-				zip_out.write(zipEntryBytes);
-			}
-
-			zip_out.flush();
-			zip_out.close();
-			sourceJar.close();
-			printMessage(MessageType.INFO, "转换成功，新的Jar创建完毕！");
+			operaMini.doConvert(saveFilePath, newServerUrl);
+			printMessage(MessageType.INFO, "转换成功，新的文件创建完毕！");
 		} catch (Exception e) {
 			e.printStackTrace();
-			printMessage(MessageType.ERROR, "转换失败，可能是Jar版本不对或已被转换。");
+			String message = String.format("转换失败，%s", e.getMessage());
+			printMessage(MessageType.ERROR, message);
 		}
-
 	}
 
-	private void checkJarInfo() {
-		String sourceFilePath = sourceJarTextField.getText().trim();
-		String jarVersion = null;
-		String classFile = null;
-		int founded = 0;
+	private void checkOperaMiniInfo() {
+		String openFilePath = openFilePathTextField.getText().trim();
+
+		if (openFilePath.isEmpty()) {
+			printMessage(MessageType.ERROR, "未完整输入全部选项。");
+			return;
+		}
+
+		// select platform from extension
+		if (openFilePath.endsWith(".jar")) {
+			operaMini = new JavaPlatform(openFilePath);
+		}
+
+		if (openFilePath.endsWith(".exe")) {
+			operaMini = new WMPlatform(openFilePath);
+		}
+
+		// start to check info
 		try {
-			ZipFile sourceJar = new ZipFile(sourceFilePath);
-			Enumeration<? extends ZipEntry> entries = sourceJar.entries();
-
-			while (entries.hasMoreElements() && founded < 2) {
-				ZipEntry entry = entries.nextElement();
-				InputStream in = sourceJar.getInputStream(entry);
-				byte[] zipEntryBytes = Changer.readAlltoBytes(in);
-
-				if (entry.getName().equals("META-INF/MANIFEST.MF")) {
-					String manifest = new String(zipEntryBytes);
-					String[] lines = manifest.split("\n");
-					for (String line : lines) {
-						if (line.startsWith("MIDlet-Version")) {
-							jarVersion = line.split(": ")[1];
-							founded += 1;
-						}
-					}
-					continue;
-				}
-
-				if (entry.getName().endsWith(".class")) {
-					String bytesString = new String(zipEntryBytes,
-							Charset.forName("US-ASCII"));
-					for (OperaMini opmi : OperaMini.operaMiniItems) {
-						if (bytesString.indexOf(opmi.httpServer) != -1) {
-							operaMini = opmi;
-							classFile = entry.getName();
-							founded += 1;
-							break;
-						}
-					}
-				}
-			}
-			operaMini.setJarVersion(jarVersion);
-			operaMini.setClassFile(classFile);
-			String message = String.format("Opera Mini %s %s, 服务器地址在 %s 文件中。",
-					jarVersion, operaMini.name, classFile);
+			String message = operaMini.checkInfo();
 			printMessage(MessageType.INFO, message);
-			sourceJar.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 			printMessage(MessageType.ERROR, "不支持的版本。");
@@ -448,7 +372,7 @@ public class MainFrame extends JFrame {
 
 	private void showAboutDialog() {
 		String aboutText;
-		aboutText = "Opera Mini Server Changer v0.2.2\n under GPLv3 write by muzuiget";
+		aboutText = FRAME_TITLE + "\n" + "基于 GPLv3 许可证 \n" + "作者是 muzuiget";
 		JOptionPane.showMessageDialog(null, aboutText, "关于",
 				JOptionPane.INFORMATION_MESSAGE);
 	}
@@ -474,35 +398,32 @@ public class MainFrame extends JFrame {
 
 	private void setUpEventListener() {
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-		sourceJarButton.addMouseListener(buttonMouseAdapter);
-		saveJarButton.addMouseListener(buttonMouseAdapter);
-		testServerButton.addMouseListener(buttonMouseAdapter);
+		openFilePathButton.addMouseListener(buttonMouseAdapter);
+		saveFilePathButton.addMouseListener(buttonMouseAdapter);
+		newServerUrlButton.addMouseListener(buttonMouseAdapter);
 		aboutButton.addMouseListener(buttonMouseAdapter);
 		exitButton.addMouseListener(buttonMouseAdapter);
 		convertButton.addMouseListener(buttonMouseAdapter);
 		serverLinkLabel.addMouseListener(linkLabelMouseAdapter);
 		clientLinkLabel.addMouseListener(linkLabelMouseAdapter);
-		clientNextLinkLabel.addMouseListener(linkLabelMouseAdapter);
-		clientCHNLinkLabel.addMouseListener(linkLabelMouseAdapter);
-		clientNextCHNLinkLabel.addMouseListener(linkLabelMouseAdapter);
-		clientLABLinkLabel.addMouseListener(linkLabelMouseAdapter);
 		emulatorLinkLabel.addMouseListener(linkLabelMouseAdapter);
 	}
 
-	private class JarFileFilter extends FileFilter {
+	private class OpenFileFilter extends FileFilter {
 
 		@Override
 		public boolean accept(File f) {
 			if (f.isDirectory()) {
 				return true;
 			} else {
-				return f.getName().toLowerCase().endsWith(".jar");
+				String extension = f.getName().toLowerCase();
+				return extension.endsWith(".jar") || extension.endsWith(".exe");
 			}
 		}
 
 		@Override
 		public String getDescription() {
-			return "jar 文件";
+			return "jar | exe 文件";
 		}
 
 	}
@@ -525,15 +446,15 @@ public class MainFrame extends JFrame {
 
 		public void mouseClicked(MouseEvent e) {
 			Object source = e.getSource();
-			if (source == sourceJarButton) {
+			if (source == openFilePathButton) {
 				selectSourceJarFile();
 				return;
 			}
-			if (source == saveJarButton) {
+			if (source == saveFilePathButton) {
 				selectSaveJarFile();
 				return;
 			}
-			if (source == testServerButton) {
+			if (source == newServerUrlButton) {
 				testProxyServer();
 				return;
 			}

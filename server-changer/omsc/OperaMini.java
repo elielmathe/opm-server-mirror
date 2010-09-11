@@ -1,68 +1,276 @@
 package omsc;
 
-public class OperaMini {
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Enumeration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
-	public static final OperaMini international, internationalNext;
-	public static final OperaMini china, chinaNext, chinaLab;
-	public static final OperaMini[] operaMiniItems;
-	public static final String SERVER_KEY = "c1dd7ab77e2c967746fe10681026c920f864811321bcb8be6bbfa5a03fda4e16c9c8db3af280f7703366e778e93c55e7159a8852d2b1381e521a337f22b1406cddf41a3114aecb4f4bfe79e0c5aa2ba8824fc989cb8bdcbf8ec5cef5176bfd4059f229b91bfa025126b295f9c409e75f6f6415ee094fd7f5dfd395a1f431668c5a08e88de891dc4dd38d4e9aa9b9c00dc604a0428e3aa5a28ccfa75af099147b";
-	public static final String CHINA_SERVER_KEY = "8c60d2a6811f85366af231ae416831b09409b614e9cfa8fde8d8577e892636e0e0b7a151f9601b930bf527ea8a22bfe6fb5f72506bd3e81b3b55d189af17e35b2d7ea61d84ba4e62cf1c01789edb2c3f3c00fc3c09ee1fc9627367294727e52af4c990516d8d7aad4e00d6ab50cd8ca63705df0af243e666dad282d6514b656780e108d591cf78920f7bdee21ed1419a080655ca2acdadc4e64dba01b5accf73";
+public abstract class OperaMini {
 
-	public String name, version, downloadLink, classFile, httpServer,
-			socketServer, jarVersion;
-	public boolean changerKey;
+	static final String[] DEFAULT_SERVERS = {
+			"http://server4.operamini.com:80/",
+			"socket://server4.operamini.com:1080",
+			"http://mini5.opera-mini.net:80/",
+			"socket://mini5.opera-mini.net:1080" };
 
-	public OperaMini(String name, String version, String downloadLink,
-			String httpServer, String socketServer, boolean changerKey) {
-		this.name = name;
-		this.version = version;
-		this.downloadLink = downloadLink;
-		this.httpServer = httpServer;
-		this.socketServer = socketServer;
-		this.changerKey = changerKey;
+	protected String openFilePath;
+
+	public OperaMini(String openFilePath) {
+		this.openFilePath = openFilePath;
 	}
 
-	public String[] getLabelText() {
-		String[] text = { version + " " + name, downloadLink };
-		return text;
+	public abstract String checkInfo() throws IOException;
+
+	public abstract void doConvert(String saveFilePath, String newServerUrl)
+			throws IOException;
+
+	public static byte[] readAlltoBytes(InputStream in) throws IOException {
+		int readLength;
+		byte[] buffer = new byte[10240];
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+		while ((readLength = in.read(buffer)) != -1) {
+			out.write(buffer, 0, readLength);
+		}
+		out.flush();
+		out.close();
+		in.close();
+
+		return out.toByteArray();
 	}
 
-	public void setClassFile(String filename) {
-		this.classFile = filename;
+	public static byte[] replaceBytes(byte[] bytes, byte[] sourceBytes,
+			byte[] replacementBytes) {
+		String sourceString = new String(sourceBytes,
+				Charset.forName("US-ASCII"));
+		String bytesString = new String(bytes, Charset.forName("US-ASCII"));
+
+		// find source text position
+		int offsetStart = bytesString.indexOf(sourceString);
+		if (offsetStart == -1) {
+			return bytes;
+		}
+
+		int offsetEnd = offsetStart + sourceBytes.length;
+
+		int newBytesLength = bytes.length
+				+ (replacementBytes.length - sourceBytes.length);
+		ByteArrayOutputStream out = new ByteArrayOutputStream(newBytesLength);
+
+		out.write(bytes, 0, offsetStart);
+		out.write(replacementBytes, 0, replacementBytes.length);
+		out.write(bytes, offsetEnd, bytes.length - offsetEnd);
+
+		return out.toByteArray();
+
 	}
 
-	public void setJarVersion(String version) {
-		this.jarVersion = version;
+}
+
+class JavaPlatform extends OperaMini {
+
+	String jarVersion;
+	String classFile;
+
+	public JavaPlatform(String inputFilePath) {
+		super(inputFilePath);
 	}
 
-	static {
-		international = new OperaMini("国际版", "4.2",
-				"http://www.opera.com/mobile/download/versions/",
-				"http://server4.operamini.com:80/",
-				"socket://server4.operamini.com:1080", false);
-		internationalNext = new OperaMini("国际版", "5.1",
-				"http://www.opera.com/mobile/download/versions/",
-				"http://mini5.opera-mini.net:80/",
-				"socket://mini5.opera-mini.net:1080", false);
-		china = new OperaMini("中国版", "4.2",
-				"http://www.operachina.com/mini/download/",
-				"http://59.151.106.229:80/", "socket://59.151.106.229:1080",
-				true);
-		chinaNext = new OperaMini("中国版", "5.1",
-				"http://www.operachina.com/mini/download/",
-				"http://mini5cn.opera-mini.net:80/",
-				"socket://mini5cn.opera-mini.net:1080", true);
-		chinaLab = new OperaMini("实验室版", "4.2",
-				"http://www.operachina.com/id/",
-				"http://china-4.opera-mini.net:80/",
-				"socket://china-4.opera-mini.net:1080", true);
+	@Override
+	public String checkInfo() throws IOException {
 
-		operaMiniItems = new OperaMini[5];
-		operaMiniItems[0] = international;
-		operaMiniItems[1] = internationalNext;
-		operaMiniItems[2] = china;
-		operaMiniItems[3] = chinaNext;
-		operaMiniItems[4] = chinaLab;
+		int founded = 0;
+
+		ZipFile openJar = new ZipFile(openFilePath);
+		Enumeration<? extends ZipEntry> entries = openJar.entries();
+
+		while (entries.hasMoreElements() && founded < 2) {
+			ZipEntry entry = entries.nextElement();
+			InputStream in = openJar.getInputStream(entry);
+			byte[] zipEntryBytes = readAlltoBytes(in);
+
+			if (entry.getName().equals("META-INF/MANIFEST.MF")) {
+				String manifest = new String(zipEntryBytes);
+				String[] lines = manifest.split("\n");
+				for (String line : lines) {
+					if (line.startsWith("MIDlet-Version")) {
+						jarVersion = line.split(": ")[1];
+						founded += 1;
+					}
+				}
+				continue;
+			}
+
+			if (entry.getName().endsWith(".class")) {
+				String bytesString = new String(zipEntryBytes,
+						Charset.forName("US-ASCII"));
+				for (String server : OperaMini.DEFAULT_SERVERS) {
+					if (bytesString.indexOf(server) != -1) {
+						classFile = entry.getName();
+						founded += 1;
+						break;
+					}
+				}
+			}
+		}
+		String message = String.format("Opera Mini %s, 服务器地址在 %s 文件中。",
+				jarVersion, classFile);
+		openJar.close();
+		return message;
+
 	}
 
+	@Override
+	public void doConvert(String saveFilePath, String newServerUrl)
+			throws IOException {
+
+		ZipFile openJar = new ZipFile(openFilePath);
+		File saveJar = new File(saveFilePath);
+		saveJar.createNewFile();
+		ZipOutputStream zip_out = new ZipOutputStream(new FileOutputStream(
+				saveJar));
+
+		Enumeration<? extends ZipEntry> entries = openJar.entries();
+
+		while (entries.hasMoreElements()) {
+			ZipEntry entry = entries.nextElement();
+			InputStream in = openJar.getInputStream(entry);
+			byte[] zipEntryBytes = readAlltoBytes(in);
+
+			// if entry is the class file which need to change
+			if (entry.getName().equals(classFile)) {
+				for (String server : OperaMini.DEFAULT_SERVERS) {
+					zipEntryBytes = replaceClassBytesString(zipEntryBytes,
+							server, newServerUrl);
+				}
+			}
+
+			zip_out.putNextEntry(new ZipEntry(entry.getName()));
+			zip_out.write(zipEntryBytes);
+		}
+
+		zip_out.flush();
+		zip_out.close();
+		openJar.close();
+	}
+
+	private static byte[] replaceClassBytesString(byte[] bytes, String source,
+			String replacement) {
+		byte[] sourceBytes = classStringBytes(source);
+		byte[] replacementBytes = classStringBytes(replacement);
+		return replaceBytes(bytes, sourceBytes, replacementBytes);
+	}
+
+	private static byte[] classStringBytes(String text) {
+		int length = text.length();
+		byte[] bytes = new byte[length + 2];
+		bytes[0] = (byte) (length >> 8);
+		bytes[1] = (byte) (length);
+		System.arraycopy(text.getBytes(), 0, bytes, 2, length);
+		return bytes;
+	}
+}
+
+class WMPlatform extends OperaMini {
+
+	String exeVersion;
+
+	public WMPlatform(String openFilePath) {
+		super(openFilePath);
+	}
+
+	@Override
+	public String checkInfo() throws IOException {
+		File openFile = new File(openFilePath);
+		FileInputStream openFileInputStream = new FileInputStream(openFile);
+		byte[] openFileBytes = readAlltoBytes(openFileInputStream);
+		String bytesString = new String(openFileBytes,
+				Charset.forName("US-ASCII"));
+
+		int beginIndex = bytesString.indexOf("Opera Mini/")
+				+ "Opera Mini/".length();
+		int endIndex = beginIndex + "x.x.xxxxx".length();
+		exeVersion = bytesString.substring(beginIndex, endIndex);
+		String message = String.format("Opera Mini %s For Windows Mobile。",
+				exeVersion);
+		openFileInputStream.close();
+		return message;
+	}
+
+	@Override
+	public void doConvert(String saveFilePath, String newServerUrl)
+			throws IOException {
+		File openFile = new File(openFilePath);
+		FileInputStream openFileInputStream = new FileInputStream(openFile);
+		byte[] openFileBytes = readAlltoBytes(openFileInputStream);
+
+		// replace server url
+		openFileBytes = replacePE32BytesString(openFileBytes,
+				"http://server4.operamini.com:80", newServerUrl);
+		ByteArrayInputStream saveFileByteArrayInputStream = new ByteArrayInputStream(
+				openFileBytes);
+
+		// create new file
+		File saveFile = new File(saveFilePath);
+		saveFile.createNewFile();
+		FileOutputStream saveFileOutputStream = new FileOutputStream(saveFile);
+
+		// write to file
+		int length;
+		byte[] buffer = new byte[10240];
+		while ((length = saveFileByteArrayInputStream.read(buffer)) != -1) {
+			saveFileOutputStream.write(buffer, 0, length);
+		}
+		saveFileOutputStream.flush();
+		saveFileOutputStream.close();
+		openFileInputStream.close();
+	}
+
+	private static byte[] replacePE32BytesString(byte[] bytes, String source,
+			String replacement) {
+		int length = findPE32StringMaxLength(bytes, source);
+		int margin = replacement.length() - length;
+		if (margin > 0) {
+			String message = String.format("代理地址长度超出 %d 个字符", margin);
+			throw new IndexOutOfBoundsException(message);
+		}
+
+		byte[] sourceBytes = pe32StringBytes(source, length);
+		byte[] replacementBytes = pe32StringBytes(replacement, length);
+		return replaceBytes(bytes, sourceBytes, replacementBytes);
+	}
+
+	private static int findPE32StringMaxLength(byte[] bytes, String source) {
+		String bytesString = new String(bytes, Charset.forName("US-ASCII"));
+		int offsetStart = bytesString.indexOf(source);
+		if (offsetStart == -1) {
+			return 0;
+		}
+
+		int offsetEnd = offsetStart + source.length();
+		int i;
+		for (i = offsetEnd; i < bytes.length; i++) {
+			if (bytes[i] != 0x00) {
+				break;
+			}
+		}
+		return i - 1 - offsetStart;
+	}
+
+	private static byte[] pe32StringBytes(String text, int length) {
+		byte[] bytes = new byte[length];
+		for (int i = 0; i < length; i++) {
+			bytes[i] = 0x00;
+		}
+		System.arraycopy(text.getBytes(), 0, bytes, 0, text.length());
+		return bytes;
+	}
 }
