@@ -3,24 +3,22 @@
 
 = 简介 =
 
-Opera Mini Server Changer是修改Java版的Opera Mini服务器地址的工具，直接生成修改后的Jar。
-    * 目前支持4.2和5.1国际版、中国版和实验室版。
+OperaMini服务器地址修改器的最新为 0.3 版，[http://code.google.com/p/opm-server-mirror/downloads/detail?name=omsc.zip 下载地址]。
     * 使用Java编写的，可以运行在Linux、Windows、Mac上。
-    * 目前为 0.2.2 版，下载地址在[http://code.google.com/p/opm-server-mirror/downloads/list 项目下载页]。
+    * 支持Java版和WM版。
 
-https://images2-focus-opensocial.googleusercontent.com/gadgets/proxy?url=http%3A%2F%2Fdl-web.dropbox.com%2Fu%2F2992664%2Fwiki%2Fomsc_screenshot.png&container=focus&gadget=a&no_expand=1&resize_h=0&rewriteMime=image%2F*
+https://images2-focus-opensocial.googleusercontent.com/gadgets/proxy?url=http%3A%2F%2Fdl-web.dropbox.com%2Fu%2F2992664%2Fwiki%2Fomsc.png&container=focus&gadget=a&no_expand=1&resize_h=0&rewriteMime=image%2F*
 
 = 使用 =
 
 运行需要Java虚拟机，可到[http://www.java.com/zh_CN/ Java官网]下载。
     # 安装后Java虚拟后，运行omsc.exe即可。
-    # 选择jar文件和保存文件，测试一下代理地址，点击“修改”，搞定。
+    # 选择打开文件和保存文件，测试一下代理地址，点击“修改”，搞定。
     # 复制到手机前你也可以用MicroEmulator来测试一下。
 
 一些注意事项
     * 至于哪里获得代理网址，自己去找或搭建，测试功能只是简单的测试，电脑上能访问在手机上未必能访问。
-    * 推荐使用国际版，中国版加进了一些本地化网络支持可能有些不稳定问题。 
-    * 不同版本都测试一下，找出适合你手机的版本。
+    * WM版本对代理地址长度有限制。
 
 = 问题解答 =
 
