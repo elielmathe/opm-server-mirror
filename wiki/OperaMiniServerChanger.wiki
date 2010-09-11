@@ -13,12 +13,12 @@ https://images2-focus-opensocial.googleusercontent.com/gadgets/proxy?url=http%3A
 
 运行需要Java虚拟机，可到[http://www.java.com/zh_CN/ Java官网]下载。
     # 安装后Java虚拟后，运行omsc.exe即可。
-    # 选择打开文件和保存文件，测试一下代理地址，点击“修改”，搞定。
+    # 选择打开文件（jar或exe）和保存文件，测试一下代理地址，点击“修改”，搞定。
     # 复制到手机前你也可以用MicroEmulator来测试一下。
 
 一些注意事项
     * 至于哪里获得代理网址，自己去找或搭建，测试功能只是简单的测试，电脑上能访问在手机上未必能访问。
-    * WM版本对代理地址长度有限制。
+    * WM版本对代理地址长度有限制，5.1正式版中必须少于35个字符，程序会自动判断的。
 
 = 问题解答 =
 
