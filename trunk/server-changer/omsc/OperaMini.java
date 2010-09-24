@@ -121,8 +121,12 @@ class JavaPlatform extends OperaMini {
 				}
 			}
 		}
-		String message = String.format("Opera Mini %s, 服务器地址在 %s 文件中。",
-				jarVersion, classFile);
+		String message = String.format("Opera Mini %s，", jarVersion);
+		if (classFile != null) {
+			message += String.format("服务器地址在 %s 文件中。", classFile);
+		} else {
+			message += String.format("找不到默认代理地址，无法进行修改。");
+		}
 		openJar.close();
 		return message;
 
@@ -181,6 +185,7 @@ class JavaPlatform extends OperaMini {
 
 class WMPlatform extends OperaMini {
 
+	String DEFAULT_SERVER = "http://server4.operamini.com:80";
 	String exeVersion;
 
 	public WMPlatform(String openFilePath) {
@@ -195,12 +200,21 @@ class WMPlatform extends OperaMini {
 		String bytesString = new String(openFileBytes,
 				Charset.forName("US-ASCII"));
 
+		// find version
 		int beginIndex = bytesString.indexOf("Opera Mini/")
 				+ "Opera Mini/".length();
 		int endIndex = beginIndex + "x.x.xxxxx".length();
 		exeVersion = bytesString.substring(beginIndex, endIndex);
-		String message = String.format("Opera Mini %s For Windows Mobile。",
-				exeVersion);
+
+		String message = String.format("Opera Mini %s，", exeVersion);
+
+		// find default server address
+		int offsetStart = bytesString.indexOf(DEFAULT_SERVER);
+		if (offsetStart == -1) {
+			message += "找不到默认代理地址，无法进行修改。";
+		} else {
+			message += "找到默认代理地址，可以修改。";
+		}
 		openFileInputStream.close();
 		return message;
 	}
@@ -213,8 +227,8 @@ class WMPlatform extends OperaMini {
 		byte[] openFileBytes = readAlltoBytes(openFileInputStream);
 
 		// replace server url
-		openFileBytes = replacePE32BytesString(openFileBytes,
-				"http://server4.operamini.com:80", newServerUrl);
+		openFileBytes = replacePE32BytesString(openFileBytes, DEFAULT_SERVER,
+				newServerUrl);
 		ByteArrayInputStream saveFileByteArrayInputStream = new ByteArrayInputStream(
 				openFileBytes);
 

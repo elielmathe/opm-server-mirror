@@ -40,16 +40,16 @@ import javax.swing.filechooser.FileFilter;
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
 
-	private static final int FRAME_WIDTH = 520;
-	private static final int FRAME_HEIGHT = 460;
-	private static final String VERSION = "v0.3";
+	private static final int FRAME_WIDTH = 460;
+	private static final int FRAME_HEIGHT = 400;
+	private static final String VERSION = "v0.3.1";
 	private static final String FRAME_TITLE = "Opera Mini 服务器地址修改器 " + VERSION;
 
-	public static final String[] SERVER_LINK = { "opm-server-mirror",
+	public static final String[] SERVER_LINK = { "中转服务器项目",
 			"http://code.google.com/p/opm-server-mirror/" };
-	public static final String[] CLIENT_LINK = { "Opera Mini",
+	public static final String[] CLIENT_LINK = { "OperaMini国际版",
 			"http://www.opera.com/mobile/download/versions/" };
-	public static final String[] EMULATOR_LINK = { "MicroEmulator",
+	public static final String[] EMULATOR_LINK = { "Java ME 模拟器",
 			"http://code.google.com/p/microemu/downloads/list" };
 
 	private JPanel contentPanel;
@@ -76,6 +76,7 @@ public class MainFrame extends JFrame {
 		initComponents();
 		setupGUI();
 		setUpEventListener();
+		printMessage(MessageType.TIPS, "仅支持修改官方国际版原版。");
 	}
 
 	public static void main(String[] args) {
@@ -185,7 +186,9 @@ public class MainFrame extends JFrame {
 
 		// links panel
 		JPanel linksPanel = new JPanel();
-		linksPanel.setLayout(new GridBagLayout());
+		FlowLayout linksPanelLayout = new FlowLayout();
+		linksPanelLayout.setAlignment(FlowLayout.LEFT);
+		linksPanel.setLayout(linksPanelLayout);
 
 		JPanel serverLinksPanel = new JPanel();
 		serverLinksPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 0));
@@ -199,12 +202,10 @@ public class MainFrame extends JFrame {
 		emulatorLinksPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 0));
 		emulatorLinksPanel.add(emulatorLinkLabel);
 
-		linksPanel.add(new JLabel("代理服务端下载："), constraintLabel);
-		linksPanel.add(serverLinksPanel, constraintFillEnd);
-		linksPanel.add(new JLabel("手机客户端下载："), constraintLabel);
-		linksPanel.add(clientLinksPanel, constraintFillEnd);
-		linksPanel.add(new JLabel("Java ME 模拟器："), constraintLabel);
-		linksPanel.add(emulatorLinksPanel, constraintFillEnd);
+		linksPanel.add(new JLabel("相关链接："));
+		linksPanel.add(serverLinksPanel);
+		linksPanel.add(clientLinksPanel);
+		linksPanel.add(emulatorLinksPanel);
 
 		JScrollPane messagePanel = new JScrollPane();
 		messageTextArea.setEditable(false);
@@ -345,7 +346,7 @@ public class MainFrame extends JFrame {
 			printMessage(MessageType.INFO, message);
 		} catch (Exception e) {
 			e.printStackTrace();
-			printMessage(MessageType.ERROR, "不支持的版本。");
+			printMessage(MessageType.ERROR, "所选文件无效。");
 		}
 
 	}
