@@ -3,7 +3,8 @@
 
 = 简介 =
 
-OperaMini服务器地址修改器的最新为 0.3 版，[http://code.google.com/p/opm-server-mirror/downloads/detail?name=omsc.zip 下载地址]。
+OperaMini服务器地址修改器的最新为 0.3.1 版，[http://code.google.com/p/opm-server-mirror/downloads/detail?name=omsc.zip 下载地址]。
+    * 仅支持官方国际版原版。
     * 使用Java编写的，可以运行在Linux、Windows、Mac上。
     * 支持Java版和WM版。
 
@@ -18,7 +19,7 @@ https://images2-focus-opensocial.googleusercontent.com/gadgets/proxy?url=http%3A
 
 一些注意事项
     * 至于哪里获得代理网址，自己去找或搭建，测试功能只是简单的测试，电脑上能访问在手机上未必能访问。
-    * WM版本对代理地址长度有限制，5.1正式版中必须少于35个字符，程序会自动判断的。
+    * WM版本对代理地址长度有限制，5.1正式版中必须少于36个字符，程序会自动判断的。
 
 = 问题解答 =
 
