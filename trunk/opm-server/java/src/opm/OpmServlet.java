@@ -63,7 +63,7 @@ public class OpmServlet extends HttpServlet {
 			connection.setRequestProperty("Cache-Control", "no-cache, max-age=0");	// App Engine doesn't obey the "no-cache" directive, see GAE Issue 739
 			connection.setRequestProperty("Pragma", "no-cache");
 			connection.setUseCaches(false);
-			connection.setReadTimeout(10000);
+			connection.setReadTimeout(60000);
 
 			// forward request data to server
 			int length;
